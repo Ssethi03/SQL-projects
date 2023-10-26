@@ -1,0 +1,106 @@
+How many distinct items were ordered
+select count (distinct name)
+from `dannys-diner-394605.swiggy.items`
+
+How many dishes are veg and non veg
+SELECT is_veg, count(name) as items
+FROM `dannys-diner-394605.swiggy.items` 
+group by is_veg
+
+Show the data where name has word ‘Chicken’
+SELECT *
+FROM `dannys-diner-394605.swiggy.items` 
+where name like'%Chicken%'
+
+Show the data where name has word ‘Paratha’
+SELECT *
+FROM `dannys-diner-394605.swiggy.items` 
+where name like '%Paratha%'
+
+How many average items were ordered per order
+SELECT count(name)/count(distinct order_id) as avgitemperorder
+FROM `dannys-diner-394605.swiggy.items` 
+
+How many times each order has been ordered in a descending order
+SELECT name,count(*) as no_of_times_ordered
+FROM `dannys-diner-394605.swiggy.items` 
+group by name
+order by count(*) desc
+
+How many orders during rainy time
+SELECT distinct(rain_mode) 
+FROM `dannys-diner-394605.swiggy.orders` 
+
+Restaurants with most orders
+SELECT restaurant_name, count(*)
+FROM `dannys-diner-394605.swiggy.orders` 
+group by restaurant_name
+order by count(*) desc
+
+Orders placed per year and month
+SELECT format_date('%Y- %m', order_time),count(distinct order_id)
+FROM `dannys-diner-394605.swiggy.orders` 
+group by format_date('%Y- %m', order_time)
+order by count(distinct order_id) desc
+
+Most recent order
+SELECT max(order_time)
+FROM `dannys-diner-394605.swiggy.orders` 
+
+
+Revenue made by month
+ SELECT format_date('%Y-%m', order_time),sum(order_total) as totalrevenue
+FROM `dannys-diner-394605.swiggy.orders` 
+group by format_date('%Y-%m', order_time)
+order by totalrevenue desc
+
+Avg order value
+SELECT sum(order_total)/count(distinct order_id) as avgorders
+FROM `dannys-diner-394605.swiggy.orders` 
+
+YOY change in revenue
+with totalrevenue as (
+SELECT format_date('%Y',order_time) as year, sum(order_total) as revenue
+FROM `dannys-diner-394605.swiggy.orders` 
+group by format_date('%Y',order_time))
+
+select *, lag(revenue) over (order by year) as YOY
+from totalrevenue
+
+Year with hightest revenue ranking
+with totalrevenue as (
+SELECT format_date('%Y',order_time) as year, sum(order_total) as revenue
+FROM `dannys-diner-394605.swiggy.orders` 
+group by format_date('%Y',order_time))
+
+select *,
+rank() over(order by revenue desc) as ranking
+from totalrevenue
+
+Restaurant with highest revenue ranking
+with totalrevenue as (
+SELECT restaurant_name, sum(order_total) as revenue
+FROM `dannys-diner-394605.swiggy.orders` 
+group by restaurant_name)
+
+select *,
+rank() over(order by revenue desc) as ranking
+from totalrevenue
+order by revenue desc
+
+Join order and items table
+SELECT a.name,a.is_veg, b.restaurant_name,b.order_id,b.order_time,
+FROM `dannys-diner-394605.swiggy.items` a
+inner join `dannys-diner-394605.swiggy.orders` b
+on a.order_id=b.order_id
+
+Self join
+SELECT a.order_id,a.name,b.name as name2,concat(a.name,b.name)
+FROM `dannys-diner-394605.swiggy.items` a
+join  `dannys-diner-394605.swiggy.items`b
+on a.order_id=b.order_id
+where a.name!=b.name
+and a.name<b.name
+ 
+
+
